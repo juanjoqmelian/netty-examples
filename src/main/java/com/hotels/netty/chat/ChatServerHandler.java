@@ -15,6 +15,9 @@ public class ChatServerHandler extends ChannelInboundHandlerAdapter {
     @Override
     public void handlerAdded(ChannelHandlerContext ctx) throws Exception {
         System.out.println("[NETTY-CHAT-SERVER] - " + ctx.channel().remoteAddress() + " has joined the room!");
+        for (Channel channel : channels) {
+            channel.writeAndFlush("[NETTY-CHAT-SERVER] - " + ctx.channel().remoteAddress() + " has joined the room!\n");
+        }
         channels.add(ctx.channel());
     }
 
@@ -22,12 +25,15 @@ public class ChatServerHandler extends ChannelInboundHandlerAdapter {
     public void handlerRemoved(ChannelHandlerContext ctx) throws Exception {
         System.out.println("[NETTY-CHAT-SERVER] - " + ctx.channel().remoteAddress() + " has left the room!");
         channels.remove(ctx.channel());
+        for (Channel channel : channels) {
+            channel.writeAndFlush("[NETTY-CHAT-SERVER] - " + ctx.channel().remoteAddress() + " has left the room!\n");
+        }
     }
 
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
 
-        System.out.print("[" + ctx.channel().remoteAddress() + "] - " + msg);
+        System.out.print("[NETTY-CHAT-SERVER]-[" + ctx.channel().remoteAddress() + "] - " + msg);
 
         Channel incoming = ctx.channel();
         for (Channel channel : channels) {
