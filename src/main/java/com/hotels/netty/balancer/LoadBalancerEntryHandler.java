@@ -12,6 +12,7 @@ import io.netty.channel.ChannelInboundHandlerAdapter;
 public class LoadBalancerEntryHandler extends ChannelInboundHandlerAdapter {
 
     private volatile Channel outboundChannel;
+    private Instance instance;
 
     @Override
     public void channelActive(ChannelHandlerContext ctx) throws Exception {
@@ -23,7 +24,9 @@ public class LoadBalancerEntryHandler extends ChannelInboundHandlerAdapter {
                 .group(inboundChannel.eventLoop())
                 .handler(new LoadBalancerConnectionHandler(inboundChannel));
 
-        final Instance instance = LoadBalancer.ROUND_ROBIN.getNext();
+        if (instance == null) {
+            instance = LoadBalancer.ROUND_ROBIN.getNext();
+        }
 
         ChannelFuture future = connection.connect(instance.getHost(), instance.getPort());
 
@@ -37,6 +40,7 @@ public class LoadBalancerEntryHandler extends ChannelInboundHandlerAdapter {
                     inboundChannel.read();
                 } else {
                     System.out.println("Something went wrong trying to connect to instance " + instance);
+                    instance = null;
                     inboundChannel.close();
                 }
             }
