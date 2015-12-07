@@ -23,24 +23,24 @@ public class LoadBalancerConnectionHandler extends ChannelInboundHandlerAdapter 
     @Override
     public void channelRead(final ChannelHandlerContext ctx, Object msg) throws Exception {
 
-        final ChannelFuture future = inboundChannel.writeAndFlush(msg);
+        final ChannelFuture channelFuture = inboundChannel.writeAndFlush(msg);
 
-        future.addListener(new ChannelFutureListener() {
+        channelFuture.addListener(new ChannelFutureListener() {
             @Override
             public void operationComplete(ChannelFuture future) throws Exception {
                 if (future.isSuccess()) {
                     ctx.channel().read();
                 } else {
-                    ctx.channel().close();
+                    future.channel().close();
                 }
             }
-        });
+        })
+        .addListener(ChannelFutureListener.CLOSE);
     }
 
     @Override
     public void channelInactive(ChannelHandlerContext ctx) throws Exception {
         LoadBalancerEntryHandler.closeOnFlush(inboundChannel);
-        System.out.println("Closing connection!");
     }
 
     @Override

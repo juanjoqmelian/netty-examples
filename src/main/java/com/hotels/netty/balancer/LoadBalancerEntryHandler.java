@@ -41,10 +41,10 @@ public class LoadBalancerEntryHandler extends ChannelInboundHandlerAdapter {
                     System.out.println("Connected to instance " + instance);
                     inboundChannel.read();
                 } else {
-                    System.out.println("Something went wrong trying to connect to instance " + instance);
                     instance = null;
                     inboundChannel.close();
                 }
+
             }
         });
     }
@@ -54,15 +54,15 @@ public class LoadBalancerEntryHandler extends ChannelInboundHandlerAdapter {
 
         if (outboundChannel.isActive()) {
 
-            ChannelFuture future = outboundChannel.writeAndFlush(msg);
+            ChannelFuture channelFuture = outboundChannel.writeAndFlush(msg);
 
-            future.addListener(new ChannelFutureListener() {
+            channelFuture.addListener(new ChannelFutureListener() {
                 @Override
                 public void operationComplete(ChannelFuture future) throws Exception {
                     if (future.isSuccess()) {
                         ctx.channel().read();
                     } else {
-                        ctx.channel().close();
+                        future.channel().close();
                     }
                 }
             });
