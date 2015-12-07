@@ -40,6 +40,7 @@ public class LoadBalancerConnectionHandler extends ChannelInboundHandlerAdapter 
     @Override
     public void channelInactive(ChannelHandlerContext ctx) throws Exception {
         LoadBalancerEntryHandler.closeOnFlush(inboundChannel);
+        System.out.println("Closing connection!");
     }
 
     @Override

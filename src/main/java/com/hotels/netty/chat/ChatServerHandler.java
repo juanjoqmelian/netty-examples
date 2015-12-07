@@ -1,12 +1,13 @@
 package com.hotels.netty.chat;
 
 import io.netty.channel.Channel;
+import io.netty.channel.ChannelHandler.Sharable;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.channel.group.ChannelGroup;
 import io.netty.channel.group.DefaultChannelGroup;
 
-
+@Sharable
 public class ChatServerHandler extends ChannelInboundHandlerAdapter {
 
     private static final ChannelGroup channels = new DefaultChannelGroup("all-connected", null);
@@ -36,11 +37,9 @@ public class ChatServerHandler extends ChannelInboundHandlerAdapter {
         System.out.print("[NETTY-CHAT-SERVER]-[" + ctx.channel().remoteAddress() + "] - " + msg);
 
         Channel incoming = ctx.channel();
-        for (Channel channel : channels) {
-            if (channel != incoming) {
-                channel.writeAndFlush("[" + ctx.channel().remoteAddress() + "] - " + msg);
-            }
-        }
+        channels.stream().filter(channel -> channel != incoming).forEach(channel -> {
+            channel.writeAndFlush("[" + ctx.channel().remoteAddress() + "] - " + msg);
+        });
     }
 
     @Override

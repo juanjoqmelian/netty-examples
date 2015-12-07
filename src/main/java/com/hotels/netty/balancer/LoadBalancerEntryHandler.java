@@ -7,6 +7,7 @@ import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
+import io.netty.channel.ChannelOption;
 
 
 public class LoadBalancerEntryHandler extends ChannelInboundHandlerAdapter {
@@ -22,6 +23,7 @@ public class LoadBalancerEntryHandler extends ChannelInboundHandlerAdapter {
         final Bootstrap connection = new Bootstrap()
                 .channel(ctx.channel().getClass())
                 .group(inboundChannel.eventLoop())
+                .option(ChannelOption.AUTO_READ, false)
                 .handler(new LoadBalancerConnectionHandler(inboundChannel));
 
         if (instance == null) {
